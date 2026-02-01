@@ -1,0 +1,59 @@
+site:
+  title: "导航门户"
+  icon: "/vite.svg"
+  background:
+    light: "/default-background.jpg"
+    dark: "/default-background.jpg"
+
+widgets:
+  - name: time
+    gridWidth: half
+  - name: weather
+    gridWidth: half
+  - name: github-trending
+  - name: seasonal-anime
+  - name: steam-wishlist
+    ids:
+      - 39
+
+bookmarks:
+  - category: "常用工具"
+    items:
+      - name: "GitHub"
+        url: "https://github.com"
+        icon: "/vite.svg"
+        description: "全球最大的代码托管平台"
+      - name: "Gmail"
+        url: "https://mail.google.com"
+        description: "谷歌官方邮箱服务"
+      - name: "Google Drive"
+        url: "https://drive.google.com"
+        description: "谷歌云端存储服务"
+      - name: "Notion"
+        url: "https://notion.so"
+        description: "一体化笔记与协作工具"
+      - name: "Slack"
+        url: "https://slack.com"
+        description: "团队沟通与协作平台"
+
+  - category: "社交媒体"
+    items:
+      - name: "Twitter"
+        url: "https://twitter.com"
+      - name: "LinkedIn"
+        url: "https://linkedin.com"
+      - name: "Reddit"
+        url: "https://reddit.com"
+      - name: "YouTube"
+        url: "https://youtube.com"
+
+  - category: "开发工具"
+    items:
+      - name: "Stack Overflow"
+        url: "https://stackoverflow.com"
+      - name: "MDN Web Docs"
+        url: "https://developer.mozilla.org"
+      - name: "Dev.to"
+        url: "https://dev.to"
+      - name: "CodePen"
+        url: "https://codepen.io"
