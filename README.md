@@ -88,3 +88,25 @@ npm install && npm run build
 ```
 
 构建产物输出到`dist`目录，将Nginx指向目录中的静态资源即可，注意如果修改了配置文件，需要重新构建，否则`public`文件夹中的相关资源不会复制到`dist`。
+
+参考Nginx配置文件如下。
+
+```nginx
+server {
+    listen 80;
+    listen [::]:80;
+    listen 443 ssl;
+    listen [::]:443 ssl;
+    server_name portal.local.gacfox.com;
+    ssl_certificate /etc/letsencrypt/live/portal.local.gacfox.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/portal.local.gacfox.com/privkey.pem;
+    location / {
+        root /home/pi/portal.local.gacfox.com/dist;
+        index index.html index.htm;
+        try_files $uri $uri/ /index.html;
+
+        auth_basic "Restricted Content";
+        auth_basic_user_file /etc/nginx/.htpasswd;
+    }
+}
+```
