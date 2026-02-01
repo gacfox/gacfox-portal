@@ -66,29 +66,34 @@ const WEATHER_CODES = {
 
 const CACHE_DURATION = 6 * 60 * 60 * 1000;
 
-function getCachedWeather() {
+function getCachedWeather(latitude, longitude) {
   const cached = localStorage.getItem("weather_data");
   if (cached) {
-    const { data, timestamp } = JSON.parse(cached);
-    if (Date.now() - timestamp < CACHE_DURATION) {
+    const { data, timestamp, location } = JSON.parse(cached);
+    const isSameLocation =
+      location &&
+      Math.abs(location.latitude - latitude) < 0.01 &&
+      Math.abs(location.longitude - longitude) < 0.01;
+    if (isSameLocation && Date.now() - timestamp < CACHE_DURATION) {
       return data;
     }
   }
   return null;
 }
 
-function setCachedWeather(data) {
+function setCachedWeather(data, latitude, longitude) {
   localStorage.setItem(
     "weather_data",
     JSON.stringify({
       data,
       timestamp: Date.now(),
+      location: { latitude, longitude },
     }),
   );
 }
 
 async function fetchWeather(latitude, longitude) {
-  const cache = getCachedWeather();
+  const cache = getCachedWeather(latitude, longitude);
   if (cache) {
     return cache;
   }
@@ -104,7 +109,7 @@ async function fetchWeather(latitude, longitude) {
   }
 
   const data = await response.json();
-  setCachedWeather(data);
+  setCachedWeather(data, latitude, longitude);
   return data;
 }
 
