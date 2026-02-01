@@ -66,15 +66,11 @@ const WEATHER_CODES = {
 
 const CACHE_DURATION = 6 * 60 * 60 * 1000;
 
-function getCachedWeather(latitude, longitude) {
+function getCachedWeather() {
   const cached = localStorage.getItem("weather_data");
   if (cached) {
-    const { data, timestamp, location } = JSON.parse(cached);
-    const isSameLocation =
-      location &&
-      Math.abs(location.latitude - latitude) < 0.01 &&
-      Math.abs(location.longitude - longitude) < 0.01;
-    if (isSameLocation && Date.now() - timestamp < CACHE_DURATION) {
+    const { data, timestamp } = JSON.parse(cached);
+    if (Date.now() - timestamp < CACHE_DURATION) {
       return data;
     }
   }
@@ -93,11 +89,6 @@ function setCachedWeather(data, latitude, longitude) {
 }
 
 async function fetchWeather(latitude, longitude) {
-  const cache = getCachedWeather(latitude, longitude);
-  if (cache) {
-    return cache;
-  }
-
   const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
   const response = await fetch(
@@ -127,6 +118,13 @@ function WeatherCard() {
   useEffect(() => {
     const getWeather = async () => {
       try {
+        const cached = getCachedWeather();
+        if (cached) {
+          setWeather(cached);
+          setLoading(false);
+          return;
+        }
+
         if (!navigator.geolocation) {
           throw new Error("Geolocation not supported");
         }
