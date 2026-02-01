@@ -52,7 +52,7 @@ site:
 widgets:
   - name: time                   # 时钟组件
     gridWidth: half              # 占据的栅格宽度，full或half
-  - name: weather                # 天气组件，使用Open Meteo API，需要授权允许浏览器读取经纬度
+  - name: weather                # 天气组件，使用Open Meteo API
     gridWidth: half              # 占据的栅格宽度，full或half
   - name: github-trending        # GitHub Trending组件，使用Github API
   - name: seasonal-anime         # 当季番剧组件，使用Jikan API
@@ -65,6 +65,7 @@ widgets:
 
 * 如果想删除一个小组件，将配置项移除即可，配置的顺序就是小组件在栅格中排列的顺序。
 * 调用天气、Github等公共API时都有数小时的缓存，如果想立即刷新可以手动删除浏览器Local Storage中的缓存数据。
+* 天气组件由于用到Geolocation API，因此必须由用户授权读取经纬度信息并使用HTTPS部署站点，否则无法通过浏览器的安全校验。
 
 ### 书签配置
 
@@ -80,10 +81,10 @@ bookmarks:
 
 ## 部署站点
 
-先克隆项目，然后安装NPM依赖并构建，最后复制`site.example.yaml`到`site.yaml`并根据需求修改即可。`site.yaml`配置文件是运行时加载和解析的，如果后续只修改配置文件或添加图片不必重新构建。
+先克隆项目，然后复制`site.example.yaml`到`site.yaml`并根据需求修改即可，最后安装依赖并构建项目。
 
 ```bash
 npm install && npm run build
 ```
 
-构建产物输出到`dist`目录，将Nginx指向目录中的静态资源即可。
+构建产物输出到`dist`目录，将Nginx指向目录中的静态资源即可，注意如果修改了配置文件，需要重新构建，否则`public`文件夹中的相关资源不会复制到`dist`。
