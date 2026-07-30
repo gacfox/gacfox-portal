@@ -17,6 +17,8 @@ import (
 type Claims struct {
 	UserID   uint   `json:"uid"`
 	Username string `json:"username"`
+	// PwdVer 签发时用户的密码版本，用于改密后失效旧令牌
+	PwdVer int `json:"pv,omitempty"`
 	jwt.RegisteredClaims
 }
 
@@ -35,11 +37,12 @@ func CheckPassword(hash, password string) bool {
 }
 
 // GenerateToken 为用户签发 HS256 JWT，有效期 expireHours 小时
-func GenerateToken(secret string, userID uint, username string, expireHours int) (string, error) {
+func GenerateToken(secret string, userID uint, username string, pwdVer int, expireHours int) (string, error) {
 	now := time.Now()
 	claims := Claims{
 		UserID:   userID,
 		Username: username,
+		PwdVer:   pwdVer,
 		RegisteredClaims: jwt.RegisteredClaims{
 			IssuedAt:  jwt.NewNumericDate(now),
 			ExpiresAt: jwt.NewNumericDate(now.Add(time.Duration(expireHours) * time.Hour)),

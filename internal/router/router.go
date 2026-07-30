@@ -25,8 +25,10 @@ func New(h *handler.Handler, cfg *config.Config, jwtSecret string) (*gin.Engine,
 		api.POST("/init", h.Init)
 		api.POST("/login", h.Login)
 
-		authed := api.Group("", middleware.JWTAuth(jwtSecret))
+		authed := api.Group("", middleware.JWTAuth(jwtSecret, h.DB))
 		{
+			authed.PUT("/account/password", h.ChangePassword)
+
 			authed.GET("/site", h.GetSite)
 			authed.PUT("/site", h.UpdateSite)
 

@@ -13,6 +13,7 @@ import CategoryFormModal from "@/components/edit/CategoryFormModal";
 import SiteSettingsModal from "@/components/edit/SiteSettingsModal";
 import WidgetSettingsModal from "@/components/edit/WidgetSettingsModal";
 import ConfirmDialog from "@/components/edit/ConfirmDialog";
+import PasswordModal from "@/components/edit/PasswordModal";
 
 function PortalPage() {
   const [config, setConfig] = useState(null);
@@ -28,6 +29,7 @@ function PortalPage() {
   const [confirm, setConfirm] = useState(null); // {message, action}
   const [showSiteSettings, setShowSiteSettings] = useState(false);
   const [showWidgetSettings, setShowWidgetSettings] = useState(false);
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
 
   const applySite = useCallback((data) => {
     setConfig(data);
@@ -261,7 +263,15 @@ function PortalPage() {
         <EditToolbar
           onSiteSettings={() => setShowSiteSettings(true)}
           onWidgetSettings={() => setShowWidgetSettings(true)}
+          onChangePassword={() => setShowPasswordModal(true)}
           onDone={() => setEditMode(false)}
+        />
+      )}
+
+      {showPasswordModal && (
+        <PasswordModal
+          onSuccess={logout}
+          onClose={() => setShowPasswordModal(false)}
         />
       )}
 

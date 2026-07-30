@@ -9,6 +9,7 @@ import (
 	"gacfox-portal/internal/auth"
 	"gacfox-portal/internal/database"
 	"gacfox-portal/internal/helper"
+	"gacfox-portal/internal/middleware"
 	"gacfox-portal/internal/model"
 )
 
@@ -88,10 +89,55 @@ func (h *Handler) Login(c *gin.Context) {
 }
 
 func (h *Handler) respondWithToken(c *gin.Context, user *model.User) {
-	token, err := auth.GenerateToken(h.JWTSecret, user.ID, user.Username, h.Config.JWT.ExpireHours)
+	token, err := auth.GenerateToken(h.JWTSecret, user.ID, user.Username, user.PasswordVersion, h.Config.JWT.ExpireHours)
 	if err != nil {
 		helper.InternalError(c, "generate token failed")
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"token": token, "username": user.Username})
+}
+
+type changePasswordRequest struct {
+	OldPassword string `json:"oldPassword" binding:"required"`
+	NewPassword string `json:"newPassword" binding:"required,min=6,max=128"`
+}
+
+// ChangePassword PUT /api/account/password — 校验旧密码后更新；
+// 密码版本递增使所有已签发令牌立即失效
+func (h *Handler) ChangePassword(c *gin.Context) {
+	var req changePasswordRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		helper.BadRequest(c, "old password required, new password at least 6 characters")
+		return
+	}
+
+	claims := middleware.GetClaims(c)
+	if claims == nil {
+		helper.Unauthorized(c, "invalid token")
+		return
+	}
+
+	var user model.User
+	if err := h.DB.First(&user, claims.UserID).Error; err != nil {
+		helper.Unauthorized(c, "user no longer exists")
+		return
+	}
+	if !auth.CheckPassword(user.PasswordHash, req.OldPassword) {
+		helper.Error(c, http.StatusForbidden, "old password is incorrect")
+		return
+	}
+
+	hash, err := auth.HashPassword(req.NewPassword)
+	if err != nil {
+		helper.InternalError(c, "hash password failed")
+		return
+	}
+	if err := h.DB.Model(&user).Updates(map[string]any{
+		"password_hash":    hash,
+		"password_version": user.PasswordVersion + 1,
+	}).Error; err != nil {
+		helper.InternalError(c, "update password failed")
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"ok": true})
 }

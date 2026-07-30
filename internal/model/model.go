@@ -7,8 +7,11 @@ type User struct {
 	ID           uint      `gorm:"primaryKey" json:"id"`
 	Username     string    `gorm:"uniqueIndex;size:64;not null" json:"username"`
 	PasswordHash string    `gorm:"size:128;not null" json:"-"`
-	CreatedAt    time.Time `json:"createdAt"`
-	UpdatedAt    time.Time `json:"updatedAt"`
+	// PasswordVersion 随每次改密递增，JWT 中携带签发时的版本，
+	// 版本不匹配即令牌失效（改密后旧令牌全部作废）
+	PasswordVersion int       `gorm:"not null;default:0" json:"-"`
+	CreatedAt       time.Time `json:"createdAt"`
+	UpdatedAt       time.Time `json:"updatedAt"`
 }
 
 // Category 书签分类
