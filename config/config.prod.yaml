@@ -1,0 +1,10 @@
+server:
+  port: 8080
+
+data_dir: "./data"
+
+jwt:
+  secret: ""
+  expire_hours: 720
+
+gin_mode: release

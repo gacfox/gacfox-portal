@@ -1,0 +1,14 @@
+site:
+  title: "导航门户"
+  icon: "/vite.svg"
+  background:
+    light: "/default-background.jpg"
+    dark: "/default-background.jpg"
+
+widgets:
+  - name: time
+    gridWidth: half
+  - name: weather
+    gridWidth: half
+
+bookmarks: []
