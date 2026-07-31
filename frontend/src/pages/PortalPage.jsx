@@ -98,7 +98,7 @@ function PortalPage() {
     const res = await run(() =>
       bookmark
         ? api(`/bookmarks/${bookmark.id}`, { method: "PUT", body: fields })
-        : api(`/categories/${categoryId}/bookmarks`, {
+        : api(`/categories/${fields.categoryId ?? categoryId}/bookmarks`, {
             method: "POST",
             body: fields,
           }),
@@ -278,6 +278,8 @@ function PortalPage() {
       {bookmarkModal && (
         <BookmarkFormModal
           bookmark={bookmarkModal.bookmark}
+          categories={categories}
+          categoryId={bookmarkModal.categoryId}
           onSave={saveBookmark}
           onClose={() => setBookmarkModal(null)}
         />

@@ -15,6 +15,7 @@ type bookmarkRequest struct {
 	URL         string `json:"url" binding:"required,min=1,max=512"`
 	Icon        string `json:"icon" binding:"max=512"`
 	Description string `json:"description" binding:"max=512"`
+	CategoryID  uint   `json:"categoryId"` // 可选：变更书签所属分类
 }
 
 // CreateBookmark POST /api/categories/:id/bookmarks
@@ -69,12 +70,28 @@ func (h *Handler) UpdateBookmark(c *gin.Context) {
 		return
 	}
 
-	if err := h.DB.Model(bookmark).Updates(map[string]any{
+	updates := map[string]any{
 		"name":        req.Name,
 		"url":         req.URL,
 		"icon":        req.Icon,
 		"description": req.Description,
-	}).Error; err != nil {
+	}
+
+	// 跨分类移动：追加到目标分类末尾
+	if req.CategoryID != 0 && req.CategoryID != bookmark.CategoryID {
+		var target model.Category
+		if err := h.DB.First(&target, req.CategoryID).Error; err != nil {
+			helper.BadRequest(c, "target category not found")
+			return
+		}
+		var maxSort int
+		h.DB.Model(&model.Bookmark{}).Where("category_id = ?", target.ID).
+			Select("COALESCE(MAX(sort), -1)").Scan(&maxSort)
+		updates["category_id"] = target.ID
+		updates["sort"] = maxSort + 1
+	}
+
+	if err := h.DB.Model(bookmark).Updates(updates).Error; err != nil {
 		helper.InternalError(c, "update bookmark failed")
 		return
 	}

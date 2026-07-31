@@ -5,12 +5,14 @@ import IconField from "@/components/edit/IconField";
 const inputClass =
   "w-full px-3 py-2 rounded-xl text-sm bg-gray-100 dark:bg-slate-700/50 border border-gray-200 dark:border-white/10 text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-400/60";
 
-// BookmarkFormModal 新建/编辑书签，bookmark 为 null 时表示新建
-export default function BookmarkFormModal({ bookmark, onSave, onClose }) {
+// BookmarkFormModal 新建/编辑书签，bookmark 为 null 时表示新建；
+// 可通过"所属分类"下拉框把书签移动（或创建）到其它分类
+export default function BookmarkFormModal({ bookmark, categories = [], categoryId, onSave, onClose }) {
   const [name, setName] = useState(bookmark?.name ?? "");
   const [url, setUrl] = useState(bookmark?.url ?? "");
   const [icon, setIcon] = useState(bookmark?.icon ?? "");
   const [description, setDescription] = useState(bookmark?.description ?? "");
+  const [targetCategoryId, setTargetCategoryId] = useState(categoryId);
   const [error, setError] = useState("");
   const [saving, setSaving] = useState(false);
 
@@ -19,7 +21,13 @@ export default function BookmarkFormModal({ bookmark, onSave, onClose }) {
     setError("");
     setSaving(true);
     try {
-      await onSave({ name: name.trim(), url: url.trim(), icon, description });
+      await onSave({
+        name: name.trim(),
+        url: url.trim(),
+        icon,
+        description,
+        categoryId: targetCategoryId,
+      });
     } catch (err) {
       setError(err.message);
       setSaving(false);
@@ -44,6 +52,24 @@ export default function BookmarkFormModal({ bookmark, onSave, onClose }) {
             className={inputClass}
           />
         </div>
+        {categories.length > 1 && (
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              所属分类
+            </label>
+            <select
+              value={targetCategoryId}
+              onChange={(e) => setTargetCategoryId(Number(e.target.value))}
+              className={inputClass}
+            >
+              {categories.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.category}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
         <div>
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
             链接
