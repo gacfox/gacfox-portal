@@ -11,6 +11,10 @@
 - 🧩 小组件：时钟、天气、GitHub Trending、当季番剧、Steam 愿望单
 - 📦 单可执行文件分发
 
+## 截图
+
+![](./doc/screenshot.png)
+
 ## 项目结构
 
 ```
@@ -49,7 +53,39 @@ go build -o ./bin/server ./cmd/server/
 ./bin/server
 ```
 
-运行时数据（SQLite `gacfox.db`、上传文件、JWT 密钥）写入可执行文件旁的 `data/` 目录（可在配置文件中修改 `data_dir`）。
+运行时数据（SQLite `gacfox.db`、上传文件、JWT 密钥）写入 `data_dir` 指定的目录（默认 `./data`，相对于进程工作目录）。
+
+## systemd 部署
+
+配置文件路径与 `data_dir` 均相对于进程**工作目录**解析，因此 unit 中需将 `WorkingDirectory` 设为部署目录（内含 `bin/server` 与 `config/`），参考配置文件如下。
+
+/etc/systemd/system/gacfox-portal.service
+
+```ini
+[Unit]
+Description=Gacfox Portal
+After=network.target
+
+[Service]
+Type=simple
+User=gacfox
+WorkingDirectory=/opt/gacfox-portal
+ExecStart=/opt/gacfox-portal/bin/server
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
+```
+
+```bash
+sudo systemctl daemon-reload
+sudo systemctl enable --now gacfox-portal
+# 查看日志
+journalctl -u gacfox-portal -f
+```
+
+如需指定其他配置文件，可在 `ExecStart` 后追加 `-config` 参数（建议使用绝对路径）。
 
 ## 配置
 
